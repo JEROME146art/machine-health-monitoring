@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX // Machine Health Monitoring System · Industrial IoT &amp; ML</title>
+    <meta name="description" content="Next-generation industrial machine health monitoring platform powered by IoT telemetry, IsolationForest anomaly detection, and predictive RUL maintenance.">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Ambient Aurora Glow Canvas -->
+    <div class="aurora" aria-hidden="true">
+        <span class="aurora__blob aurora__blob--1"></span>
+        <span class="aurora__blob aurora__blob--2"></span>
+        <span class="aurora__blob aurora__blob--3"></span>
+    </div>
+
+    <!-- ===== Master Command Header ===== -->
+    <header class="topbar">
+        <div class="topbar__brand">
+            <div class="topbar__logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3.2" class="logo__core"></circle>
+                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" class="logo__spokes"></path>
+                </svg>
+            </div>
+            <div class="topbar__titles">
+                <div class="brand__row">
+                    <h1>APEX HEALTH AI</h1>
+                    <span class="brand__tag">v2.4 ENTERPRISE</span>
+                </div>
+                <p>Industrial IoT Telemetry · IsolationForest Anomaly Engine · Predictive RUL</p>
+            </div>
+        </div>
+
+        <!-- Master Navigation Switcher Tabs -->
+        <nav class="topbar__nav" role="tablist" aria-label="Main Navigation">
+            <button class="nav-tab is-active" data-view="fleet" role="tab" aria-selected="true" id="tab-fleet" title="Fleet Command Matrix (Alt+1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Fleet Matrix</span>
+            </button>
+            <button class="nav-tab" data-view="twin" role="tab" aria-selected="false" id="tab-twin" title="Digital Twin &amp; Machine Inspector (Alt+2)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>Digital Twin</span>
+            </button>
+            <button class="nav-tab" data-view="chaos" role="tab" aria-selected="false" id="tab-chaos" title="Chaos Engineering &amp; Fault Lab (Alt+3)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Chaos Lab</span>
+            </button>
+            <button class="nav-tab" data-view="alerts" role="tab" aria-selected="false" id="tab-alerts" title="Incident Command &amp; Alerts (Alt+4)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Incidents</span>
+                <span class="nav-badge" id="nav-alert-badge">0</span>
+            </button>
+            <button class="nav-tab" data-view="stream" role="tab" aria-selected="false" id="tab-stream" title="Live IoT Telemetry Feed (Alt+5)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                <span>IoT Stream</span>
+            </button>
+            <button class="nav-tab" data-view="models" role="tab" aria-selected="false" id="tab-models" title="ML Intelligence &amp; Model Architecture (Alt+6)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <span>ML Intelligence</span>
+            </button>
+            <button class="nav-tab" data-view="reports" role="tab" aria-selected="false" id="tab-reports" title="Equipment Health Audit &amp; Work Orders (Alt+7)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Work Orders</span>
+            </button>
+        </nav>
+
+        <!-- Command Controls Cluster -->
+        <div class="topbar__actions">
+            <!-- Audio Alarm Chime Toggle -->
+            <button class="btn btn--icon-pill" id="btn-sound" title="Toggle audio alarm chime (Web Audio synthesis)" aria-label="Toggle audio alarms">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <polygon id="sound-icon-poly" points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path id="sound-icon-waves" d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span id="sound-label">Audio ON</span>
+            </button>
+
+            <!-- Live Status Indicator -->
+            <div class="stat-pill stat-pill--live" title="Asynchronous IoT background simulation state">
+                <span class="live-dot" id="live-dot"></span>
+                <span class="stat-pill__value" id="sim-state">LIVE</span>
+            </div>
+
+            <!-- Simulation Pause / Resume -->
+            <button class="btn btn--ghost" id="btn-pause" title="Pause or resume background sensor simulation (Spacebar)">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+                    <path id="pause-icon" d="M6 5h4v14H6zM14 5h4v14h-4z"></path>
+                </svg>
+                <span id="pause-label">Pause</span>
+            </button>
+
+            <!-- Reset Fleet to Baseline -->
+            <button class="btn btn--ghost btn--reset" id="btn-fleet-reset" title="Clear all injected faults and reset degradation to factory nominal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Reset Fleet</span>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button class="btn btn--icon" id="btn-theme" title="Toggle Dark / Light theme (T)" aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true">
+                    <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"></path>
+                </svg>
+            </button>
+
+            <!-- OpenAPI Swagger Link -->
+            <a class="btn btn--ghost btn--api" href="/docs" target="_blank" rel="noopener" title="Open interactive Swagger API documentation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span>API Docs</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== Main Viewport Container ===== -->
+    <main class="main-viewport">
+
+        <!-- ============================================================== -->
+        <!-- VIEW 1: FLEET MATRIX (DEFAULT)                                 -->
+        <!-- ============================================================== -->
+        <section class="view-panel is-active" id="view-fleet" role="tabpanel" aria-labelledby="tab-fleet">
+            <!-- Executive KPI Bar -->
+            <div class="kpi-deck">
+                <div class="kpi-card">
+                    <div class="kpi-card__head">
+                        <span class="kpi-card__title">Fleet Health Index</span>
+                        <span class="kpi-card__badge" id="kpi-health-badge">OPTIMAL</span>
+                    </div>
+                    <div class="kpi-card__body">
+                        <div class="kpi-card__metric" id="fleet-health">96.8%</div>
+                        <div class="kpi-card__sub">Mean composite score across 4 monitored assets</div>
+                    </div>
+                    <div class="kpi-card__bar">
+                        <div class="kpi-card__bar-fill" id="fleet-health-bar" style="width: 96.8%;"></div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card__head">
+                        <span class="kpi-card__title">Monitored Assets</span>
+                        <span class="kpi-card__badge kpi-card__badge--ok">4 / 4 ONLINE</span>
+                    </div>
+                    <div class="kpi-card__body">
+                        <div class="kpi-card__metric">4 <small>UNITS</small></div>
+                        <div class="kpi-card__sub">Motor, Pump, Compressor, Conveyor</div>
+                    </div>
+                    <div class="kpi-card__status-dots">
+                        <span class="dot dot--healthy" title="Motor 01: Normal"></span>
+                        <span class="dot dot--healthy" title="Pump 01: Normal"></span>
+                        <span class="dot dot--healthy" title="Compressor 01: Normal"></span>
+                        <span class="dot dot--healthy" title="Conveyor 01: Normal"></span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card__head">
+                        <span class="kpi-card__title">Active Fault Alarms</span>
+                        <span class="kpi-card__badge" id="kpi-alerts-badge">CLEAR</span>
+                    </div>
+                    <div class="kpi-card__body">
+                        <div class="kpi-card__metric" id="kpi-alert-count">0</div>
+                        <div class="kpi-card__sub">0 Critical · 0 Warning anomalies</div>
+                    </div>
+                    <div class="kpi-card__footer-link">
+                        <a href="#alerts" class="link--action" data-nav="alerts">Open incident triage &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card__head">
+                        <span class="kpi-card__title">Projected Fleet MTTF</span>
+                        <span class="kpi-card__badge kpi-card__badge--info">RUL MODEL</span>
+                    </div>
+                    <div class="kpi-card__body">
+                        <div class="kpi-card__metric" id="kpi-mttf">48.0 <small>HRS</small></div>
+                        <div class="kpi-card__sub">Linear regression failure velocity estimate</div>
+                    </div>
+                    <div class="kpi-card__mini-trend" id="kpi-mttf-sub">Nominal operation envelope</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card__head">
+                        <span class="kpi-card__title">Telemetry Ingestion</span>
+                        <span class="kpi-card__badge kpi-card__badge--pulse">0.5 HZ</span>
+                    </div>
+                    <div class="kpi-card__body">
+                        <div class="kpi-card__metric" id="kpi-ingest-rate">120 <small>PKT/MIN</small></div>
+                        <div class="kpi-card__sub">5 channels &times; 4 units · Latency ~14ms</div>
+                    </div>
+                    <div class="kpi-card__footer-link">
+                        <a href="#stream" class="link--action" data-nav="stream">Inspect IoT gateway stream &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fleet Machine Grid -->
+            <div class="section-title-row">
+                <div>
+                    <h2>Industrial Fleet Assets</h2>
+                    <p class="section-subtitle">Real-time status, circular health dial, multi-channel telemetry and ML diagnostic reason</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn btn--sm btn--ghost" id="btn-quick-inject" title="Trigger chaos injection lab">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span>Inject Fault</span>
+                    </button>
+                    <a href="/api/export/csv" class="btn btn--sm btn--ghost" download title="Download raw telemetry CSV">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export CSV</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid--fleet" id="machine-grid">
+                <!-- Dynamically populated machine cards -->
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- Master Telemetry Studio -->
+            <div class="telemetry-studio">
+                <div class="studio__head">
+                    <div class="studio__titles">
+                        <h3 id="chart-title">Live Fleet Telemetry Stream</h3>
+                        <span class="studio__sub">Multi-asset real-time time-series comparative analysis</span>
+                    </div>
+
+                    <div class="studio__controls">
+                        <!-- Sensor Selector -->
+                        <div class="seg" role="tablist" aria-label="Chart sensor channel">
+                            <button class="seg__btn is-active" data-sensor="temperature" role="tab">Temperature</button>
+                            <button class="seg__btn" data-sensor="vibration" role="tab">Vibration</button>
+                            <button class="seg__btn" data-sensor="current" role="tab">Current</button>
+                            <button class="seg__btn" data-sensor="rpm" role="tab">RPM</button>
+                            <button class="seg__btn" data-sensor="pressure" role="tab">Pressure</button>
+                            <button class="seg__btn" data-sensor="health" role="tab">Health Index</button>
+                        </div>
+
+                        <!-- Buffer Length Selector -->
+                        <div class="window-toggle" role="group" aria-label="Chart window size">
+                            <button class="btn btn--xs is-active" data-points="30">30 pts</button>
+                            <button class="btn btn--xs" data-points="60">60 pts</button>
+                            <button class="btn btn--xs" data-points="100">100 pts</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-canvas-wrap">
+                    <canvas id="chart-live" aria-label="Live multi-asset sensor chart"></canvas>
+                </div>
+
+                <div class="studio__stats-strip" id="chart-stats-strip">
+                    <div class="strip-stat">
+                        <span class="strip-stat__label">Peak Reading</span>
+                        <span class="strip-stat__val" id="strip-peak">—</span>
+                    </div>
+                    <div class="strip-stat">
+                        <span class="strip-stat__label">Fleet Mean</span>
+                        <span class="strip-stat__val" id="strip-mean">—</span>
+                    </div>
+                    <div class="strip-stat">
+                        <span class="strip-stat__label">Safety Threshold</span>
+                        <span class="strip-stat__val" id="strip-limit">—</span>
+                    </div>
+                    <div class="strip-stat">
+                        <span class="strip-stat__label">ISO 10816 Zone</span>
+                        <span class="strip-stat__val strip-stat__val--ok" id="strip-iso">Zone A (Good)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 2: DIGITAL TWIN & ASSET INSPECTOR                          -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-twin" role="tabpanel" aria-labelledby="tab-twin">
+            <div class="twin-header-bar">
+                <div>
+                    <h2>Asset Digital Twin &amp; Telemetry Inspector</h2>
+                    <p class="section-subtitle">Interactive cutaway engineering schematic, probe hot-spots, radial gauge HUD and degradation projection</p>
+                </div>
+
+                <!-- Asset Selector Pills -->
+                <div class="twin-selector" role="tablist" aria-label="Select Machine Twin">
+                    <button class="twin-btn is-active" data-machine-id="motor-01">Motor 01</button>
+                    <button class="twin-btn" data-machine-id="pump-01">Pump 01</button>
+                    <button class="twin-btn" data-machine-id="compressor-01">Compressor 01</button>
+                    <button class="twin-btn" data-machine-id="conveyor-01">Conveyor 01</button>
+                </div>
+            </div>
+
+            <!-- Twin Layout Grid -->
+            <div class="twin-grid">
+                <!-- Column 1: Interactive Schematic Diagram -->
+                <div class="twin-panel twin-panel--diagram">
+                    <div class="twin-panel__head">
+                        <div class="twin-title-group">
+                            <h3 id="twin-asset-name">Motor 01 · Induction Motor</h3>
+                            <span class="badge badge--healthy" id="twin-asset-status">HEALTHY</span>
+                        </div>
+                        <span class="twin-hint">Click sensor hot-spots on schematic to inspect localized readings</span>
+                    </div>
+
+                    <!-- Interactive Dynamic Vector Schematic -->
+                    <div class="schematic-container" id="schematic-container">
+                        <!-- SVG Digital Twin Schematic rendered by JS -->
+                    </div>
+
+                    <!-- Hotspot Probe Inspector Card -->
+                    <div class="hotspot-inspector" id="hotspot-inspector">
+                        <div class="hotspot-inspector__head">
+                            <span class="probe-dot" id="probe-dot"></span>
+                            <strong id="probe-title">Sensor Probe: Drive-End Bearing</strong>
+                        </div>
+                        <p id="probe-desc">Monitors high-frequency vibration acceleration and raceway thermal load for early bearing fatigue detection.</p>
+                        <div class="probe-metrics" id="probe-metrics">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Radial Gauge HUD Cluster -->
+                <div class="twin-panel twin-panel--hud">
+                    <div class="twin-panel__head">
+                        <h3>Telemetry HUD &amp; Operational Envelopes</h3>
+                        <span class="hud-refresh-time" id="twin-update-time">Just now</span>
+                    </div>
+
+                    <div class="gauges-cluster">
+                        <!-- Gauge 1: Health Ring -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill" id="gauge-health-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="10"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-health-val">98<small>%</small></div>
+                            </div>
+                            <span class="gauge-label">Health Index</span>
+                            <span class="gauge-sub" id="gauge-health-sub">Optimal</span>
+                        </div>
+
+                        <!-- Gauge 2: Temperature -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill gauge-fill--temp" id="gauge-temp-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="120"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-temp-val">62.4<small>°C</small></div>
+                            </div>
+                            <span class="gauge-label">Temperature</span>
+                            <span class="gauge-sub" id="gauge-temp-sub">Threshold: 85°C</span>
+                        </div>
+
+                        <!-- Gauge 3: Vibration -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill gauge-fill--vib" id="gauge-vib-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="180"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-vib-val">3.1<small>mm/s</small></div>
+                            </div>
+                            <span class="gauge-label">Vibration RMS</span>
+                            <span class="gauge-sub" id="gauge-vib-sub">Threshold: 4.5 mm/s</span>
+                        </div>
+
+                        <!-- Gauge 4: Current -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill gauge-fill--curr" id="gauge-curr-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="140"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-curr-val">21.8<small>A</small></div>
+                            </div>
+                            <span class="gauge-label">Current Draw</span>
+                            <span class="gauge-sub" id="gauge-curr-sub">Threshold: 28A</span>
+                        </div>
+
+                        <!-- Gauge 5: RPM Tachometer -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill gauge-fill--rpm" id="gauge-rpm-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="90"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-rpm-val">1480<small>RPM</small></div>
+                            </div>
+                            <span class="gauge-label">Shaft Speed</span>
+                            <span class="gauge-sub" id="gauge-rpm-sub">Nominal: 1450 RPM</span>
+                        </div>
+
+                        <!-- Gauge 6: Pressure -->
+                        <div class="radial-gauge">
+                            <div class="radial-gauge__svg-wrap">
+                                <svg viewBox="0 0 100 100" class="gauge-svg">
+                                    <circle class="gauge-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="gauge-fill gauge-fill--pres" id="gauge-pres-fill" cx="50" cy="50" r="40" stroke-dasharray="251.3" stroke-dashoffset="160"></circle>
+                                </svg>
+                                <div class="gauge-val" id="gauge-pres-val">5.2<small>bar</small></div>
+                            </div>
+                            <span class="gauge-label">Pressure</span>
+                            <span class="gauge-sub" id="gauge-pres-sub">Nominal: 5.0 bar</span>
+                        </div>
+                    </div>
+
+                    <!-- ISO 10816 Vibration Severity Bar -->
+                    <div class="iso-meter">
+                        <div class="iso-meter__head">
+                            <span>ISO 10816 Vibration Severity Standard (Class II Medium Machinery)</span>
+                            <strong id="iso-status-tag">Zone A: Good (0 - 2.8 mm/s)</strong>
+                        </div>
+                        <div class="iso-meter__track">
+                            <div class="iso-meter__zone iso-meter__zone--a" title="Zone A: Newly commissioned">Zone A</div>
+                            <div class="iso-meter__zone iso-meter__zone--b" title="Zone B: Unrestricted long-term operation">Zone B</div>
+                            <div class="iso-meter__zone iso-meter__zone--c" title="Zone C: Restricted operation, plan maintenance">Zone C</div>
+                            <div class="iso-meter__zone iso-meter__zone--d" title="Zone D: Danger, damage imminent">Zone D</div>
+                            <div class="iso-meter__cursor" id="iso-cursor" style="left: 24%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Twin Lower Section: Dual Trend Chart & Maintenance Prognostics -->
+            <div class="twin-lower-grid">
+                <!-- Dual-Axis Health & Sensor History Chart -->
+                <div class="twin-panel">
+                    <div class="twin-panel__head">
+                        <h3>Health Index &amp; Multi-Sensor Trajectory</h3>
+                        <span class="twin-hint">Last 60 telemetry samples</span>
+                    </div>
+                    <div class="chart-canvas-wrap chart-canvas-wrap--tall">
+                        <canvas id="chart-twin-history" aria-label="Machine health and sensor history"></canvas>
+                    </div>
+                </div>
+
+                <!-- Predictive Maintenance & RUL Card -->
+                <div class="twin-panel">
+                    <div class="twin-panel__head">
+                        <h3>Predictive Maintenance Prognostics</h3>
+                        <span class="badge badge--info" id="twin-prognostic-model">RUL Model v1.2</span>
+                    </div>
+
+                    <div class="prognostic-card">
+                        <div class="prognostic-hero">
+                            <div class="prognostic-stat">
+                                <span class="prognostic-stat__label">Estimated Time To Failure (RUL)</span>
+                                <div class="prognostic-stat__val" id="twin-rul-val">48.0 <small>HOURS</small></div>
+                                <span class="prognostic-stat__sub" id="twin-rul-date">Safe horizon: &gt; 48h uninterrupted</span>
+                            </div>
+                            <div class="prognostic-stat">
+                                <span class="prognostic-stat__label">Failure Prediction Confidence</span>
+                                <div class="prognostic-stat__val" id="twin-conf-val">88<small>%</small></div>
+                                <div class="conf-bar"><div class="conf-bar__fill" id="twin-conf-bar" style="width: 88%;"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="prognostic-box">
+                            <div class="prognostic-box__icon">⚠️</div>
+                            <div>
+                                <strong id="twin-fault-class">Diagnosis: Normal Operating Parameters</strong>
+                                <p id="twin-cause-text">All sensor parameters are well within learned nominal distribution envelope.</p>
+                            </div>
+                        </div>
+
+                        <div class="prognostic-recommendation">
+                            <h4>Recommended Prescriptive Actions</h4>
+                            <p id="twin-recommendation-text">No immediate action required. Continue routine telemetry polling and thermal imaging check at next scheduled shift.</p>
+                        </div>
+
+                        <!-- Spare Parts & Tooling Kit Checklist -->
+                        <div class="spare-parts-kit">
+                            <h4>Required Maintenance Consumables &amp; Spares</h4>
+                            <ul class="parts-list" id="twin-parts-list">
+                                <li><span class="part-sku">SKF-6208-2RS</span> Deep Groove Ball Bearing (Drive End)</li>
+                                <li><span class="part-sku">MOBIL-POLY-EM</span> High-Temperature Synthetic Polyurea Grease</li>
+                                <li><span class="part-sku">VIB-ALIGN-PRO</span> Laser Shaft Realignment Shim Kit (0.05mm - 1.0mm)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensor Statistics Table -->
+            <div class="twin-panel">
+                <div class="twin-panel__head">
+                    <h3>Sensor Statistical Tolerance Matrix</h3>
+                    <span class="twin-hint">Rolling Min, Max, Arithmetic Mean &amp; Safety Thresholds</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table" id="twin-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Sensor Parameter</th>
+                                <th>Current Value</th>
+                                <th>Buffer Min</th>
+                                <th>Buffer Max</th>
+                                <th>Rolling Mean</th>
+                                <th>Warning Threshold</th>
+                                <th>Critical Threshold</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 3: CHAOS LAB & FAULT INJECTION                            -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-chaos" role="tabpanel" aria-labelledby="tab-chaos">
+            <div class="chaos-header">
+                <div>
+                    <h2>Chaos Engineering &amp; Fault Injection Testbed</h2>
+                    <p class="section-subtitle">Inject synthetic electro-mechanical failure signatures into live machines to test real-time ML anomaly detection and fault classification</p>
+                </div>
+                <button class="btn btn--danger btn--pill" id="btn-chaos-clear-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                    <span>Clear All Injections &amp; Reset Fleet</span>
+                </button>
+            </div>
+
+            <div class="chaos-grid">
+                <!-- Chaos Control Deck -->
+                <div class="chaos-panel">
+                    <div class="chaos-panel__head">
+                        <h3>1. Select Target Industrial Asset</h3>
+                    </div>
+                    <div class="chaos-asset-selector" id="chaos-asset-selector">
+                        <label class="chaos-asset-radio">
+                            <input type="radio" name="chaos-machine" value="motor-01" checked>
+                            <span class="asset-tile">
+                                <span class="asset-tile__title">Motor 01</span>
+                                <span class="asset-tile__type">Induction Motor</span>
+                                <span class="asset-tile__health" data-id="motor-01">Health: 98%</span>
+                            </span>
+                        </label>
+                        <label class="chaos-asset-radio">
+                            <input type="radio" name="chaos-machine" value="pump-01">
+                            <span class="asset-tile">
+                                <span class="asset-tile__title">Pump 01</span>
+                                <span class="asset-tile__type">Centrifugal Pump</span>
+                                <span class="asset-tile__health" data-id="pump-01">Health: 98%</span>
+                            </span>
+                        </label>
+                        <label class="chaos-asset-radio">
+                            <input type="radio" name="chaos-machine" value="compressor-01">
+                            <span class="asset-tile">
+                                <span class="asset-tile__title">Compressor 01</span>
+                                <span class="asset-tile__type">Reciprocating Compressor</span>
+                                <span class="asset-tile__health" data-id="compressor-01">Health: 98%</span>
+                            </span>
+                        </label>
+                        <label class="chaos-asset-radio">
+                            <input type="radio" name="chaos-machine" value="conveyor-01">
+                            <span class="asset-tile">
+                                <span class="asset-tile__title">Conveyor 01</span>
+                                <span class="asset-tile__type">Belt Conveyor</span>
+                                <span class="asset-tile__health" data-id="conveyor-01">Health: 98%</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="chaos-panel__head" style="margin-top: 1.5rem;">
+                        <h3>2. Choose Failure Signature Mode</h3>
+                    </div>
+                    <div class="chaos-fault-cards" id="chaos-fault-selector">
+                        <label class="fault-choice-card">
+                            <input type="radio" name="chaos-fault" value="bearing_wear" checked>
+                            <div class="fault-card-body">
+                                <div class="fault-card-icon">⚙️</div>
+                                <strong>Bearing Race Degradation</strong>
+                                <p>Spikes vibration by 2.3&times; and increases friction temperature. Mimics ball flaking and cage failure.</p>
+                                <span class="fault-badge">Target: Vibration + Temp</span>
+                            </div>
+                        </label>
+
+                        <label class="fault-choice-card">
+                            <input type="radio" name="chaos-fault" value="overheating">
+                            <div class="fault-card-body">
+                                <div class="fault-card-icon">🌡️</div>
+                                <strong>Stator Coil Thermal Runaway</strong>
+                                <p>Forces temperature spike up to +45% with secondary current resistance increase.</p>
+                                <span class="fault-badge">Target: Temperature</span>
+                            </div>
+                        </label>
+
+                        <label class="fault-choice-card">
+                            <input type="radio" name="chaos-fault" value="overload">
+                            <div class="fault-card-body">
+                                <div class="fault-card-icon">⚡</div>
+                                <strong>Severe Electrical Overload</strong>
+                                <p>Multiplies current draw by 1.75&times;, causes RPM slip drop and elevated winding pressure.</p>
+                                <span class="fault-badge">Target: Current + RPM</span>
+                            </div>
+                        </label>
+
+                        <label class="fault-choice-card">
+                            <input type="radio" name="chaos-fault" value="imbalance">
+                            <div class="fault-card-body">
+                                <div class="fault-card-icon">⚖️</div>
+                                <strong>Dynamic Rotor Imbalance</strong>
+                                <p>Induces strong 1X rotational vibration harmonics (+105%) and irregular current surges.</p>
+                                <span class="fault-badge">Target: Vibration 1X</span>
+                            </div>
+                        </label>
+
+                        <label class="fault-choice-card">
+                            <input type="radio" name="chaos-fault" value="random">
+                            <div class="fault-card-body">
+                                <div class="fault-card-icon">🎲</div>
+                                <strong>Stochastic Composite Failure</strong>
+                                <p>Injects randomized multi-axis perturbation across all 5 channels to test generalized anomaly detection.</p>
+                                <span class="fault-badge">Target: All Channels</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Trigger Button -->
+                    <div class="chaos-trigger-wrap">
+                        <button class="btn btn--danger btn--xl" id="btn-chaos-inject">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            <span>EXECUTE FAULT INJECTION</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Column 2: Real-time ML Pipeline Reaction Log -->
+                <div class="chaos-panel">
+                    <div class="chaos-panel__head">
+                        <h3>ML Anomaly Engine Live Feedback</h3>
+                        <span class="live-tag">REAL-TIME SCIKIT-LEARN</span>
+                    </div>
+
+                    <div class="ml-reaction-card" id="ml-reaction-card">
+                        <div class="ml-reaction__status">
+                            <div class="status-radar-ring"></div>
+                            <div>
+                                <h4 id="ml-reaction-title">ML Pipeline Awaiting Event</h4>
+                                <p id="ml-reaction-sub">IsolationForest &amp; RandomForest are actively scoring incoming telemetry.</p>
+                            </div>
+                        </div>
+
+                        <div class="ml-feature-vector">
+                            <h5>Last Processed Feature Vector</h5>
+                            <div class="vector-chips" id="ml-vector-chips">
+                                <span>Temp: 62.1°C</span>
+                                <span>Vib: 3.12 mm/s</span>
+                                <span>Current: 21.9 A</span>
+                                <span>RPM: 1475</span>
+                                <span>Pressure: 5.1 bar</span>
+                            </div>
+                        </div>
+
+                        <div class="ml-diagnostics-box">
+                            <h5>Pipeline Decision Path</h5>
+                            <div class="decision-step">
+                                <span class="step-num">1</span>
+                                <div>
+                                    <strong>IsolationForest Unsupervised Anomaly Scoring</strong>
+                                    <p id="step-1-desc">Decision function evaluated against multivariate healthy hypersphere. Score: 0.24 (Normal).</p>
+                                </div>
+                            </div>
+                            <div class="decision-step">
+                                <span class="step-num">2</span>
+                                <div>
+                                    <strong>RandomForest Multiclass Fault Classifier</strong>
+                                    <p id="step-2-desc">Class posterior: Normal (98.7%), Bearing Wear (0.4%), Overheating (0.3%).</p>
+                                </div>
+                            </div>
+                            <div class="decision-step">
+                                <span class="step-num">3</span>
+                                <div>
+                                    <strong>Linear Degradation RUL Extrapolation</strong>
+                                    <p id="step-3-desc">Velocity: -0.02 health/hr. Estimated failure point: &gt; 48 hours.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chaos-history">
+                            <h5>Recent Injected Events</h5>
+                            <ul class="chaos-event-list" id="chaos-event-list">
+                                <li class="chaos-event--empty">No faults injected in this session yet.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 4: INCIDENT COMMAND & ALERTS TRIAGE                        -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-alerts" role="tabpanel" aria-labelledby="tab-alerts">
+            <div class="alerts-header">
+                <div>
+                    <h2>Incident Command &amp; Alerts Triage</h2>
+                    <p class="section-subtitle">Real-time observer pattern event log. Filter by severity, acknowledge incidents, and export event audits</p>
+                </div>
+                <div class="alerts-actions">
+                    <button class="btn btn--sm btn--ghost" id="btn-clear-alerts">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Clear All Alerts</span>
+                    </button>
+                    <button class="btn btn--sm btn--ghost" id="btn-export-alerts-json">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Export Incident JSON</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Incident Filter Bar -->
+            <div class="incident-filter-bar">
+                <div class="filter-group">
+                    <span class="filter-label">Severity:</span>
+                    <button class="filter-pill is-active" data-filter-severity="all">All (<span id="count-all">0</span>)</button>
+                    <button class="filter-pill filter-pill--critical" data-filter-severity="CRITICAL">Critical (<span id="count-crit">0</span>)</button>
+                    <button class="filter-pill filter-pill--warning" data-filter-severity="WARNING">Warning (<span id="count-warn">0</span>)</button>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Machine:</span>
+                    <select class="select-input" id="filter-machine-select">
+                        <option value="all">All Machines</option>
+                        <option value="motor-01">Motor 01</option>
+                        <option value="pump-01">Pump 01</option>
+                        <option value="compressor-01">Compressor 01</option>
+                        <option value="conveyor-01">Conveyor 01</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Incident Feed Table -->
+            <div class="table-wrap">
+                <table class="data-table" id="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Incident ID</th>
+                            <th>Severity</th>
+                            <th>Asset</th>
+                            <th>Root Cause Diagnosis</th>
+                            <th>Timestamp</th>
+                            <th>Triage Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alerts-tbody">
+                        <tr>
+                            <td colspan="7" class="td-empty">No alerts in system · Fleet operating in healthy nominal state</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 5: IOT GATEWAY & TELEMETRY STREAM                          -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-stream" role="tabpanel" aria-labelledby="tab-stream">
+            <div class="stream-header">
+                <div>
+                    <h2>Industrial IoT Edge Gateway Console</h2>
+                    <p class="section-subtitle">Simulated ESP32-S3 microcontroller node telemetry streaming via HTTP POST /api/readings</p>
+                </div>
+                <div class="gateway-status-badge">
+                    <span class="gateway-dot"></span>
+                    <span>GATEWAY CONNECTED (ESP32-S3)</span>
+                </div>
+            </div>
+
+            <div class="stream-grid">
+                <!-- Gateway Hardware Status Card -->
+                <div class="stream-panel">
+                    <div class="stream-panel__head">
+                        <h3>Edge Gateway Specifications</h3>
+                    </div>
+                    <div class="gateway-specs">
+                        <div class="spec-row">
+                            <span>Hardware Platform</span>
+                            <strong>Espressif ESP32-S3-WROOM-1 (Xtensa Dual-Core 240MHz)</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Ingestion Transport</span>
+                            <strong>REST HTTP/1.1 POST /api/readings (JSON)</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Wireless Network</span>
+                            <strong>IEEE 802.11 b/g/n (2.4 GHz) · RSSI: -54 dBm</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>MAC Address</span>
+                            <code>24:6F:28:9B:4C:1A</code>
+                        </div>
+                        <div class="spec-row">
+                            <span>Sensors Interfaced</span>
+                            <strong>PT100 RTD, ADXL345 Accelerometer, ACS712 Current, Hall Sensor, MPX5700DP</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Transmission Cycle</span>
+                            <strong>2000 ms (0.5 Hz heartbeat)</strong>
+                        </div>
+                    </div>
+
+                    <!-- Manual Telemetry Injection Form -->
+                    <div class="manual-inject-card">
+                        <h4>Manual Sensor Packet Ingestion Test</h4>
+                        <p>Dispatch a synthetic raw reading payload directly to the FastAPI intake endpoint.</p>
+                        <form id="form-manual-ingest" class="manual-form">
+                            <div class="form-row">
+                                <label>Machine ID</label>
+                                <select id="manual-machine-id" class="select-input">
+                                    <option value="motor-01">motor-01 (Motor)</option>
+                                    <option value="pump-01">pump-01 (Pump)</option>
+                                    <option value="compressor-01">compressor-01 (Compressor)</option>
+                                    <option value="conveyor-01">conveyor-01 (Conveyor)</option>
+                                </select>
+                            </div>
+                            <div class="form-grid-3">
+                                <div>
+                                    <label>Temp (°C)</label>
+                                    <input type="number" step="0.1" id="manual-temp" value="65.0" class="num-input">
+                                </div>
+                                <div>
+                                    <label>Vib (mm/s)</label>
+                                    <input type="number" step="0.05" id="manual-vib" value="3.2" class="num-input">
+                                </div>
+                                <div>
+                                    <label>Current (A)</label>
+                                    <input type="number" step="0.1" id="manual-curr" value="22.0" class="num-input">
+                                </div>
+                                <div>
+                                    <label>RPM</label>
+                                    <input type="number" step="10" id="manual-rpm" value="1450" class="num-input">
+                                </div>
+                                <div>
+                                    <label>Pressure (bar)</label>
+                                    <input type="number" step="0.1" id="manual-pres" value="5.0" class="num-input">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--block">POST Reading Payload</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Live Monospace Telemetry Terminal -->
+                <div class="stream-panel">
+                    <div class="stream-panel__head">
+                        <h3>Live Telemetry Packet Terminal</h3>
+                        <div class="terminal-actions">
+                            <button class="btn btn--xs btn--ghost" id="btn-terminal-clear">Clear</button>
+                            <button class="btn btn--xs btn--ghost" id="btn-terminal-pause">Pause Stream</button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="terminal-body">
+                        <!-- Populated dynamically with live packet stream -->
+                        <div class="terminal-line terminal-line--info">[SYSTEM] Initializing IoT Telemetry Listener on port 8000...</div>
+                        <div class="terminal-line terminal-line--ok">[GATEWAY] ESP32 Socket connected. Streaming 5 channels per machine every 2000ms.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 6: ML INTELLIGENCE & MODEL ARCHITECTURE                    -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-models" role="tabpanel" aria-labelledby="tab-models">
+            <div class="models-header">
+                <div>
+                    <h2>Machine Learning Intelligence Engine</h2>
+                    <p class="section-subtitle">Real-time scikit-learn estimators: IsolationForest for unsupervised outlier discovery and RandomForest for fault diagnosis</p>
+                </div>
+                <button class="btn btn--primary btn--pill" id="btn-retrain-models">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    <span>Retrain ML Models</span>
+                </button>
+            </div>
+
+            <div class="models-grid">
+                <!-- Model 1: Isolation Forest -->
+                <div class="model-spec-card">
+                    <div class="model-card__icon">🌲</div>
+                    <h3>Isolation Forest Anomaly Detector</h3>
+                    <span class="model-badge model-badge--unsupervised">Unsupervised Outlier Detection</span>
+                    <p>Constructs an ensemble of iTrees that recursively partition sensor space. Anomalies isolate with significantly shorter path lengths.</p>
+                    <div class="model-params">
+                        <div><span>Estimators:</span><strong>100 iTrees</strong></div>
+                        <div><span>Contamination:</span><strong>0.05 (5%)</strong></div>
+                        <div><span>Per-Type Models:</span><strong>4 (1 per asset type)</strong></div>
+                        <div><span>Feature Space:</span><strong>5 dimensions</strong></div>
+                    </div>
+                </div>
+
+                <!-- Model 2: Random Forest -->
+                <div class="model-spec-card">
+                    <div class="model-card__icon">🌳</div>
+                    <h3>Random Forest Fault Classifier</h3>
+                    <span class="model-badge model-badge--supervised">Supervised Multiclass Ensemble</span>
+                    <p>Ensemble of 200 randomized decision trees mapping multi-channel sensor vectors onto diagnosed mechanical failure modes.</p>
+                    <div class="model-params">
+                        <div><span>Estimators:</span><strong>200 Trees</strong></div>
+                        <div><span>Max Depth:</span><strong>12 Levels</strong></div>
+                        <div><span>Fault Classes:</span><strong>5 Categories</strong></div>
+                        <div><span>Confidence:</span><strong>Calibrated posterior probability</strong></div>
+                    </div>
+                </div>
+
+                <!-- Model 3: Linear RUL Predictor -->
+                <div class="model-spec-card">
+                    <div class="model-card__icon">📉</div>
+                    <h3>Linear Health Trend Regressor</h3>
+                    <span class="model-badge model-badge--prognostic">Prognostic Trend Extrapolation</span>
+                    <p>Evaluates rolling health index degradation velocity ($m = \Delta H / \Delta t$) to compute the exact intercept with critical failure threshold.</p>
+                    <div class="model-params">
+                        <div><span>History Buffer:</span><strong>60 samples</strong></div>
+                        <div><span>Failure Threshold:</span><strong>Health &le; 20.0</strong></div>
+                        <div><span>Confidence Bound:</span><strong>$R^2$ sample count weight</strong></div>
+                        <div><span>Nominal MTTF:</span><strong>48.0 Hours</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Importance Bar Chart -->
+            <div class="twin-panel" style="margin-top: 1.5rem;">
+                <div class="twin-panel__head">
+                    <h3>RandomForest Feature Importances (Gini Impurity Reduction)</h3>
+                    <span class="twin-hint">Derived directly from scikit-learn model parameters</span>
+                </div>
+                <div class="chart-canvas-wrap chart-canvas-wrap--medium">
+                    <canvas id="chart-feature-importance" aria-label="Feature importance bar chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Confusion Matrix / Classification Reference -->
+            <div class="twin-panel" style="margin-top: 1.5rem;">
+                <div class="twin-panel__head">
+                    <h3>Diagnostic Class Taxonomy &amp; Failure Physics</h3>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fault Class</th>
+                                <th>Primary Physical Signature</th>
+                                <th>Dominant Sensor Channel</th>
+                                <th>Critical Severity Mechanism</th>
+                                <th>Corrective Engineering Remedy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge--healthy">Normal</span></td>
+                                <td>Nominal baseline harmonics</td>
+                                <td>All channels in nominal envelope</td>
+                                <td>None (optimal operation)</td>
+                                <td>Continuous telemetry logging</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge--warning">Bearing Wear</span></td>
+                                <td>High-frequency raceway flaking</td>
+                                <td>Vibration RMS &gt; 2.0&times; baseline</td>
+                                <td>Spalling, cage collapse, lock-up</td>
+                                <td>Inspect ball raceways, regrease / replace</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge--warning">Stator Overheating</span></td>
+                                <td>Thermal runaway in windings</td>
+                                <td>Temperature &gt; 3.0&sigma; above baseline</td>
+                                <td>Insulation breakdown, winding short</td>
+                                <td>Check cooling fans, thermal paste, load</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge--critical">Electrical Overload</span></td>
+                                <td>Heavy electromagnetic phase load</td>
+                                <td>Current &gt; 1.5&times; FLA, RPM slip</td>
+                                <td>Thermal trip, rotor burnout</td>
+                                <td>Verify mechanical linkage, reduce load</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge--warning">Rotor Imbalance</span></td>
+                                <td>Eccentric center-of-mass rotation</td>
+                                <td>1X shaft speed vibration component</td>
+                                <td>Bearing fatigue, foundation damage</td>
+                                <td>Dynamic 2-plane balancing, clean rotor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 7: PREDICTIVE WORK ORDERS & AUDIT REPORTS                 -->
+        <!-- ============================================================== -->
+        <section class="view-panel" id="view-reports" role="tabpanel" aria-labelledby="tab-reports">
+            <div class="reports-header no-print">
+                <div>
+                    <h2>Equipment Health Audit &amp; Maintenance Work Orders</h2>
+                    <p class="section-subtitle">Formal plant inspection audit report with ISO 10816 vibration classification and sign-off blocks</p>
+                </div>
+                <div class="reports-actions">
+                    <button class="btn btn--primary" id="btn-print-report" onclick="window.print()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        <span>Print / Save Work Order PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Formal Industrial Health Audit Report -->
+            <div class="printable-report" id="printable-report">
+                <div class="report-header">
+                    <div class="report-brand">
+                        <div class="report-logo">APEX</div>
+                        <div>
+                            <h3>INDUSTRIAL ASSET MANAGEMENT CORPORATION</h3>
+                            <p>Predictive Maintenance Inspection Report &amp; Work Order Authorization</p>
+                        </div>
+                    </div>
+                    <div class="report-meta">
+                        <div><span>Report Ref:</span><strong>WO-2026-MHM-04</strong></div>
+                        <div><span>Audit Date:</span><strong id="report-date">October 21, 2026</strong></div>
+                        <div><span>Facility:</span><strong>Main Plant · Sector 4</strong></div>
+                        <div><span>Auditor:</span><strong>Autonomous AI Inspection Agent</strong></div>
+                    </div>
+                </div>
+
+                <!-- Executive Summary Table in Report -->
+                <div class="report-section">
+                    <h4>1. Fleet Operational Health Matrix</h4>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Machine ID</th>
+                                <th>Category</th>
+                                <th>Health Score</th>
+                                <th>Condition</th>
+                                <th>Est. RUL</th>
+                                <th>Fault Diagnosis</th>
+                                <th>Action Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-fleet-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Per-Machine Dispatched Work Order Details -->
+                <div class="report-section">
+                    <h4>2. Corrective Work Order Details &amp; Maintenance Directives</h4>
+                    <div class="work-order-cards" id="report-work-orders">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Sign-off Block for Print -->
+                <div class="report-signoff">
+                    <div class="signoff-box">
+                        <span>Certified Maintenance Engineer:</span>
+                        <div class="signature-line"></div>
+                        <small>Signature &amp; Date</small>
+                    </div>
+                    <div class="signoff-box">
+                        <span>Plant Operations Supervisor:</span>
+                        <div class="signature-line"></div>
+                        <small>Approval Authorization</small>
+                    </div>
+                    <div class="signoff-box">
+                        <span>Quality Compliance Standard:</span>
+                        <strong>ISO 10816-3 Class II</strong>
+                        <small>Vibration Mechanical Severity</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== Toast Notification ===== -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
